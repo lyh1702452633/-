@@ -1,0 +1,210 @@
+@model StudentManagementSystem.Models.Grade
+
+@{
+    ViewData["Title"] = "添加成绩";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-plus"></i> 添加成绩
+                    </h3>
+                    <div class="card-tools">
+                        <a href="@Url.Action("Grades")" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> 返回列表
+                        </a>
+                    </div>
+                </div>
+                
+                <form method="post" asp-action="CreateGrade">
+                    @Html.AntiForgeryToken()
+                    
+                    <div class="card-body">
+                        @if (ViewBag.Error != null)
+                        {
+                            <div class="alert alert-danger alert-dismissible">
+                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                <h5><i class="icon fas fa-ban"></i> 错误!</h5>
+                                @ViewBag.Error
+                            </div>
+                        }
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="StudentId">学生 <span class="text-danger">*</span></label>
+                                    <select class="form-control" id="StudentId" name="StudentId" required>
+                                        <option value="">请选择学生</option>
+                                        @if (ViewBag.Students != null)
+                                        {
+                                            @foreach (var student in (List<StudentManagementSystem.Models.Student>)ViewBag.Students)
+                                            {
+                                                <option value="@student.StudentId" selected="@(Model?.StudentId == student.StudentId)">
+                                                    @student.Name (@student.StudentNumber)
+                                                </option>
+                                            }
+                                        }
+                                    </select>
+                                    <small class="form-text text-muted">选择要录入成绩的学生</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="CourseId">课程 <span class="text-danger">*</span></label>
+                                    <select class="form-control" id="CourseId" name="CourseId" required>
+                                        <option value="">请选择课程</option>
+                                        @if (ViewBag.Courses != null)
+                                        {
+                                            @foreach (var course in (List<StudentManagementSystem.Models.Course>)ViewBag.Courses)
+                                            {
+                                                <option value="@course.CourseId" selected="@(Model?.CourseId == course.CourseId)">
+                                                    @course.CourseName (@course.CourseCode) - @course.Teacher?.Name
+                                                </option>
+                                            }
+                                        }
+                                    </select>
+                                    <small class="form-text text-muted">选择对应的课程</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="Score">分数 <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="Score" name="Score" 
+                                           value="@Model?.Score" required min="0" max="100" step="0.1" 
+                                           placeholder="0-100">
+                                    <small class="form-text text-muted">输入0-100之间的分数</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="ExamType">考试类型 <span class="text-danger">*</span></label>
+                                    <select class="form-control" id="ExamType" name="ExamType" required>
+                                        <option value="其他" selected="@(string.IsNullOrEmpty(Model?.ExamType) || Model?.ExamType == "其他")">其他</option>
+                                        <option value="平时成绩" selected="@(Model?.ExamType == "平时成绩")">平时成绩</option>
+                                        <option value="期中考试" selected="@(Model?.ExamType == "期中考试")">期中考试</option>
+                                        <option value="期末考试" selected="@(Model?.ExamType == "期末考试")">期末考试</option>
+                                        <option value="实验成绩" selected="@(Model?.ExamType == "实验成绩")">实验成绩</option>
+                                        <option value="课程设计" selected="@(Model?.ExamType == "课程设计")">课程设计</option>
+                                    </select>
+                                    <small class="form-text text-muted">选择考试类型（必填）</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="ExamDate">考试日期 <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="ExamDate" name="ExamDate" 
+                                           value="@(Model?.ExamDate.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd"))" 
+                                           required>
+                                    <small class="form-text text-muted">选择考试日期</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="Remarks">备注</label>
+                                    <textarea class="form-control" id="Remarks" name="Remarks" rows="3" 
+                                              maxlength="200" placeholder="选填，最多200字">@Model?.Remarks</textarea>
+                                    <small class="form-text text-muted">可以填写一些额外说明</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save"></i> 保存成绩
+                                </button>
+                                <a href="@Url.Action("Grades")" class="btn btn-secondary ml-2">
+                                    <i class="fas fa-times"></i> 取消
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // 增强选择框功能
+            $('#StudentId, #CourseId').select2({
+                placeholder: function() {
+                    return $(this).data('placeholder');
+                },
+                allowClear: true,
+                theme: 'bootstrap4'
+            });
+            
+            // 分数输入验证
+            $('#Score').on('input', function() {
+                var value = parseFloat($(this).val());
+                var scoreDisplay = $('#scoreDisplay');
+                
+                if (scoreDisplay.length === 0) {
+                    $(this).after('<small id="scoreDisplay" class="form-text"></small>');
+                    scoreDisplay = $('#scoreDisplay');
+                }
+                
+                if (isNaN(value) || value < 0 || value > 100) {
+                    scoreDisplay.text('分数必须在0-100之间').removeClass('text-success text-warning text-info').addClass('text-danger');
+                } else if (value < 60) {
+                    scoreDisplay.text('不及格').removeClass('text-success text-warning text-info').addClass('text-danger');
+                } else if (value < 70) {
+                    scoreDisplay.text('及格').removeClass('text-danger text-warning text-info').addClass('text-success');
+                } else if (value < 80) {
+                    scoreDisplay.text('良好').removeClass('text-danger text-success text-info').addClass('text-warning');
+                } else if (value < 90) {
+                    scoreDisplay.text('优良').removeClass('text-danger text-warning text-success').addClass('text-info');
+                } else {
+                    scoreDisplay.text('优秀').removeClass('text-danger text-warning text-info').addClass('text-success');
+                }
+            });
+            
+            // 表单验证
+            $('form').on('submit', function(e) {
+                var studentId = $('#StudentId').val();
+                var courseId = $('#CourseId').val();
+                var score = $('#Score').val();
+                var examDate = $('#ExamDate').val();
+                
+                if (!studentId) {
+                    alert('请选择学生！');
+                    e.preventDefault();
+                    return false;
+                }
+                
+                if (!courseId) {
+                    alert('请选择课程！');
+                    e.preventDefault();
+                    return false;
+                }
+                
+                if (!score || score < 0 || score > 100) {
+                    alert('请输入有效的分数（0-100）！');
+                    e.preventDefault();
+                    return false;
+                }
+                
+                if (!examDate) {
+                    alert('请选择考试日期！');
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        });
+    </script>
+} 

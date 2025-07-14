@@ -1,0 +1,169 @@
+@model StudentManagementSystem.Models.Student
+
+@{
+    ViewData["Title"] = "编辑学生";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">编辑学生信息</h3>
+                    <div class="card-tools">
+                        <a href="@Url.Action("Students")" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> 返回列表
+                        </a>
+                    </div>
+                </div>
+                
+                <form method="post">
+                    @Html.HiddenFor(m => m.StudentId)
+                    @Html.HiddenFor(m => m.UserId)
+                    @Html.HiddenFor(m => m.EnrollmentDate)
+                    
+                    <div class="card-body">
+                        @if (ViewBag.Error != null)
+                        {
+                            <div class="alert alert-danger alert-dismissible">
+                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                <h5><i class="icon fas fa-ban"></i> 错误!</h5>
+                                @ViewBag.Error
+                            </div>
+                        }
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="StudentNumber">学号 <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="StudentNumber" name="StudentNumber" 
+                                           value="@Model.StudentNumber" required maxlength="20">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="Name">姓名 <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="Name" name="Name" 
+                                           value="@Model.Name" required maxlength="50">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="Gender">性别</label>
+                                    <select class="form-control" id="Gender" name="Gender">
+                                        <option value="">请选择</option>
+                                        <option value="男" selected="@(Model.Gender == "男")">男</option>
+                                        <option value="女" selected="@(Model.Gender == "女")">女</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="BirthDate">出生日期</label>
+                                    <input type="date" class="form-control" id="BirthDate" name="BirthDate" 
+                                           value="@(Model.BirthDate?.ToString("yyyy-MM-dd"))">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="Class">班级</label>
+                                    <input type="text" class="form-control" id="Class" name="Class" 
+                                           value="@Model.Class" maxlength="50" placeholder="例如：计算机2021-1班">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="Email">邮箱</label>
+                                    <input type="email" class="form-control" id="Email" name="Email" 
+                                           value="@Model.Email" maxlength="100" placeholder="example@email.com">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="Phone">电话</label>
+                                    <input type="tel" class="form-control" id="Phone" name="Phone" 
+                                           value="@Model.Phone" maxlength="20" placeholder="13800138000">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>入学日期</label>
+                                    <input type="text" class="form-control" 
+                                           value="@Model.EnrollmentDate.ToString("yyyy-MM-dd")" readonly>
+                                    <small class="form-text text-muted">入学日期不可修改</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="Address">地址</label>
+                                    <textarea class="form-control" id="Address" name="Address" 
+                                              rows="3" maxlength="200" placeholder="请输入详细地址">@Model.Address</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+                        <h5>关联账户信息</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>用户名</label>
+                                    <input type="text" class="form-control" 
+                                           value="@Model.User?.Username" readonly>
+                                    <small class="form-text text-muted">用户名不可修改</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>账户状态</label>
+                                    <input type="text" class="form-control" 
+                                           value="@(Model.User?.IsActive == true ? "激活" : "禁用")" readonly>
+                                    <small class="form-text text-muted">账户状态需通过用户管理功能修改</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> 保存修改
+                        </button>
+                        <a href="@Url.Action("Students")" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> 取消
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('form').on('submit', function(e) {
+                var studentNumber = $('#StudentNumber').val().trim();
+                var name = $('#Name').val().trim();
+                
+                if (!studentNumber || !name) {
+                    alert('请填写学号和姓名！');
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        });
+    </script>
+} 

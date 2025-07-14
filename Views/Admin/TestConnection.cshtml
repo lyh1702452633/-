@@ -1,0 +1,43 @@
+@{
+    ViewData["Title"] = "数据库连接测试";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">数据库连接测试</h4>
+            </div>
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(ViewBag.Message))
+                {
+                    <div class="alert alert-success" role="alert">
+                        <i class="fas fa-check-circle"></i>
+                        @ViewBag.Message
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(ViewBag.Error))
+                {
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fas fa-exclamation-circle"></i>
+                        @ViewBag.Error
+                    </div>
+                }
+
+                <div class="mb-3">
+                    <p>此页面用于测试数据库连接状态。如果系统出现数据库相关错误，可以通过此页面快速诊断问题。</p>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a href="@Url.Action("TestConnection", "Admin")" class="btn btn-primary">
+                        <i class="fas fa-sync-alt"></i> 重新测试
+                    </a>
+                    <a href="@Url.Action("Index", "Admin")" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> 返回管理首页
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

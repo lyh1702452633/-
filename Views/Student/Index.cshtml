@@ -1,0 +1,122 @@
+@model Student
+@{
+    ViewData["Title"] = "学生首页";
+}
+
+<div class="row">
+    <div class="col-12">
+        <h2><i class="bi bi-house"></i> 欢迎回来，@Model.Name</h2>
+        <p class="text-muted">学号：@Model.StudentNumber | 班级：@Model.Class</p>
+        <hr>
+    </div>
+</div>
+
+<div class="row">
+    <!-- 统计卡片 -->
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-header">
+                <i class="bi bi-graph-up"></i> 平均成绩
+            </div>
+            <div class="card-body">
+                <h4 class="card-title">@(ViewBag.AverageScore?.ToString("F1") ?? "0.0")分</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-danger mb-3">
+            <div class="card-header">
+                <i class="bi bi-exclamation-triangle"></i> 不及格科目
+            </div>
+            <div class="card-body">
+                <h4 class="card-title">@ViewBag.FailedSubjectCount 门</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">
+                <i class="bi bi-calendar-check"></i> 出勤率
+            </div>
+            <div class="card-body">
+                <h4 class="card-title">@(ViewBag.AttendanceRate?.ToString("F1") ?? "0.0")%</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-header">
+                <i class="bi bi-x-circle"></i> 缺勤次数
+            </div>
+            <div class="card-body">
+                <h4 class="card-title">@ViewBag.AbsentCount 次</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- 个人信息 -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-person-badge"></i> 个人信息
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <td><strong>姓名：</strong></td>
+                        <td>@Model.Name</td>
+                    </tr>
+                    <tr>
+                        <td><strong>学号：</strong></td>
+                        <td>@Model.StudentNumber</td>
+                    </tr>
+                    <tr>
+                        <td><strong>性别：</strong></td>
+                        <td>@Model.Gender</td>
+                    </tr>
+                    <tr>
+                        <td><strong>班级：</strong></td>
+                        <td>@Model.Class</td>
+                    </tr>
+                    <tr>
+                        <td><strong>邮箱：</strong></td>
+                        <td>@Model.Email</td>
+                    </tr>
+                    <tr>
+                        <td><strong>电话：</strong></td>
+                        <td>@Model.Phone</td>
+                    </tr>
+                    <tr>
+                        <td><strong>入学时间：</strong></td>
+                        <td>@Model.EnrollmentDate.ToString("yyyy-MM-dd")</td>
+                    </tr>
+                </table>
+                <a href="@Url.Action("Profile", "Student")" class="btn btn-primary">
+                    <i class="bi bi-pencil"></i> 编辑资料
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 快捷操作 -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-grid-3x3-gap"></i> 快捷操作
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <a href="@Url.Action("Grades", "Student")" class="btn btn-outline-primary w-100 h-100 d-flex flex-column justify-content-center align-items-center">
+                            <i class="bi bi-clipboard-data fs-1"></i>
+                            <span class="mt-2">查看成绩</span>
+                        </a>
+                    </div>
+               
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

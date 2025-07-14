@@ -1,0 +1,132 @@
+@model StudentManagementSystem.Models.Teacher
+
+@{
+    ViewData["Title"] = "教师主页";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-user-tie"></i> 欢迎您，@Model.Name 老师
+                    </h3>
+                </div>
+                
+                <div class="card-body">
+                    <!-- 个人信息 -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="info-box bg-info">
+                                <span class="info-box-icon"><i class="fas fa-user"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">姓名</span>
+                                    <span class="info-box-number">@Model.Name</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-box bg-success">
+                                <span class="info-box-icon"><i class="fas fa-envelope"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">邮箱</span>
+                                    <span class="info-box-number">@(Model.Email ?? "未设置")</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 统计信息 -->
+                    <div class="row">
+                        <div class="col-lg-3 col-6">
+                            <div class="small-box bg-info">
+                                <div class="inner">
+                                    <h3>@ViewBag.TotalCourses</h3>
+                                    <p>教授课程数</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <a href="@Url.Action("Courses")" class="small-box-footer">
+                                    查看详情 <i class="fas fa-arrow-circle-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-3 col-6">
+                            <div class="small-box bg-success">
+                                <div class="inner">
+                                    <h3>@ViewBag.TotalStudents</h3>
+                                    <p>学生总数</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <a href="@Url.Action("Courses")" class="small-box-footer">
+                                    查看学生 <i class="fas fa-arrow-circle-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-3 col-6">
+                            <div class="small-box bg-warning">
+                                <div class="inner">
+                                    <h3>@ViewBag.FailedStudents</h3>
+                                    <p>不及格学生</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <a href="@Url.Action("Courses")" class="small-box-footer">
+                                    查看成绩 <i class="fas fa-arrow-circle-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- <div class="col-lg-3 col-6">
+                            <div class="small-box bg-danger">
+                                <div class="inner">
+                                    <h3>@ViewBag.AbsentStudents</h3>
+                                    <p>缺勤学生</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fas fa-user-times"></i>
+                                </div>
+                                <a href="@Url.Action("Courses")" class="small-box-footer">
+                                    查看考勤 <i class="fas fa-arrow-circle-right"></i>
+                                </a>
+                            </div>
+                        </div> -->
+                    </div>
+
+                    <!-- 快捷操作 -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title"><i class="fas fa-cogs"></i> 快捷操作</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3 col-sm-6 col-12">
+                                            <a href="@Url.Action("Courses")" class="btn btn-app">
+                                                <i class="fas fa-book"></i> 我的课程
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3 col-sm-6 col-12">
+                                            <a href="@Url.Action("Logout", "Account")" class="btn btn-app">
+                                                <i class="fas fa-sign-out-alt"></i> 退出登录
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

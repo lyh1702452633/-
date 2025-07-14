@@ -1,0 +1,138 @@
+@model StudentManagementSystem.Models.Course
+
+@{
+    ViewData["Title"] = "添加课程";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">添加课程</h3>
+                    <div class="card-tools">
+                        <a href="@Url.Action("Courses")" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> 返回列表
+                        </a>
+                    </div>
+                </div>
+                
+                <form method="post">
+                    <div class="card-body">
+                        @if (ViewBag.Error != null)
+                        {
+                            <div class="alert alert-danger alert-dismissible">
+                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                <h5><i class="icon fas fa-ban"></i> 错误!</h5>
+                                @ViewBag.Error
+                            </div>
+                        }
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="CourseCode">课程代码 <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="CourseCode" name="CourseCode" 
+                                           value="@Model?.CourseCode" required maxlength="20" placeholder="例如：CS101">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="CourseName">课程名称 <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="CourseName" name="CourseName" 
+                                           value="@Model?.CourseName" required maxlength="100" placeholder="例如：计算机科学导论">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="Credits">学分 <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="Credits" name="Credits" 
+                                           value="@Model?.Credits" required min="1" max="10" placeholder="1-10">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="TeacherId">授课教师 <span class="text-danger">*</span></label>
+                                    <select class="form-control" id="TeacherId" name="TeacherId" required>
+                                        <option value="">请选择教师</option>
+                                        @if (ViewBag.Teachers != null)
+                                        {
+                                            @foreach (var teacher in (List<StudentManagementSystem.Models.Teacher>)ViewBag.Teachers)
+                                            {
+                                                <option value="@teacher.TeacherId" selected="@(Model?.TeacherId == teacher.TeacherId)">
+                                                    @teacher.Name (@teacher.TeacherNumber)
+                                                </option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="Description">课程描述</label>
+                                    <textarea class="form-control" id="Description" name="Description" 
+                                              rows="4" maxlength="200" placeholder="请输入课程描述">@Model?.Description</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> 保存
+                        </button>
+                        <a href="@Url.Action("Courses")" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> 取消
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // 表单验证
+            $('form').on('submit', function(e) {
+                var courseCode = $('#CourseCode').val().trim();
+                var courseName = $('#CourseName').val().trim();
+                var credits = $('#Credits').val();
+                var teacherId = $('#TeacherId').val();
+                
+                if (!courseCode || !courseName || !credits || !teacherId) {
+                    alert('请填写所有必填项！');
+                    e.preventDefault();
+                    return false;
+                }
+                
+                if (courseCode.length > 20) {
+                    alert('课程代码不能超过20个字符！');
+                    e.preventDefault();
+                    return false;
+                }
+                
+                if (courseName.length > 100) {
+                    alert('课程名称不能超过100个字符！');
+                    e.preventDefault();
+                    return false;
+                }
+                
+                var creditsValue = parseInt(credits);
+                if (creditsValue < 1 || creditsValue > 10) {
+                    alert('学分必须在1-10之间！');
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        });
+    </script>
+} 

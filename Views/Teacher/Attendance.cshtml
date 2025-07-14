@@ -1,0 +1,182 @@
+@model IEnumerable<StudentManagementSystem.Models.Attendance>
+
+@{
+    ViewData["Title"] = "课程考勤管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-calendar-check"></i> @ViewBag.CourseName - 考勤管理
+                    </h3>
+                    <div class="card-tools">
+                        <a href="@Url.Action("Courses")" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> 返回课程列表
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    @if (Model != null && Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>考勤日期</th>
+                                        <th>学号</th>
+                                        <th>姓名</th>
+                                        <th>考勤状态</th>
+                                        <th>备注</th>
+                                        <th>记录时间</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var attendance in Model)
+                                    {
+                                        <tr class="@(attendance.Status == StudentManagementSystem.Models.AttendanceStatus.Absent ? "table-warning" : 
+                                                     attendance.Status == StudentManagementSystem.Models.AttendanceStatus.Late ? "table-info" : "")">
+                                            <td>@attendance.AttendanceDate.ToString("yyyy-MM-dd")</td>
+                                            <td>@attendance.Student?.StudentNumber</td>
+                                            <td>@attendance.Student?.Name</td>
+                                            <td>
+                                                @switch (attendance.Status)
+                                                {
+                                                    case StudentManagementSystem.Models.AttendanceStatus.Present:
+                                                        <span class="badge badge-success">出勤</span>
+                                                        break;
+                                                    case StudentManagementSystem.Models.AttendanceStatus.Absent:
+                                                        <span class="badge badge-danger">缺勤</span>
+                                                        break;
+                                                    case StudentManagementSystem.Models.AttendanceStatus.Late:
+                                                        <span class="badge badge-warning">迟到</span>
+                                                        break;
+                                                    case StudentManagementSystem.Models.AttendanceStatus.Leave:
+                                                        <span class="badge badge-info">请假</span>
+                                                        break;
+                                                    default:
+                                                        <span class="badge badge-secondary">未知</span>
+                                                        break;
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(attendance.Remarks))
+                                                {
+                                                    @if (attendance.Remarks.Length > 30)
+                                                    {
+                                                        <span title="@attendance.Remarks">
+                                                            @attendance.Remarks.Substring(0, 30)...
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        @attendance.Remarks
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">无</span>
+                                                }
+                                            </td>
+                                            <td>@attendance.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-sm-12 col-md-5">
+                                <div class="dataTables_info">
+                                    共显示 @Model.Count() 条考勤记录
+                                </div>
+                            </div>
+                            <div class="col-sm-12 col-md-7">
+                                <div class="text-right">
+                                    <small class="text-muted">
+                                        <span class="badge badge-success">出勤</span>
+                                        <span class="badge badge-danger">缺勤</span>
+                                        <span class="badge badge-warning">迟到</span>
+                                        <span class="badge badge-info">请假</span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 统计信息 -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title"><i class="fas fa-chart-pie"></i> 考勤统计</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="info-box bg-success">
+                                                    <span class="info-box-icon"><i class="fas fa-check"></i></span>
+                                                    <div class="info-box-content">
+                                                        <span class="info-box-text">出勤</span>
+                                                        <span class="info-box-number">@Model.Count(a => a.Status == StudentManagementSystem.Models.AttendanceStatus.Present)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="info-box bg-danger">
+                                                    <span class="info-box-icon"><i class="fas fa-times"></i></span>
+                                                    <div class="info-box-content">
+                                                        <span class="info-box-text">缺勤</span>
+                                                        <span class="info-box-number">@Model.Count(a => a.Status == StudentManagementSystem.Models.AttendanceStatus.Absent)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="info-box bg-warning">
+                                                    <span class="info-box-icon"><i class="fas fa-clock"></i></span>
+                                                    <div class="info-box-content">
+                                                        <span class="info-box-text">迟到</span>
+                                                        <span class="info-box-number">@Model.Count(a => a.Status == StudentManagementSystem.Models.AttendanceStatus.Late)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="info-box bg-info">
+                                                    <span class="info-box-icon"><i class="fas fa-user-clock"></i></span>
+                                                    <div class="info-box-content">
+                                                        <span class="info-box-text">请假</span>
+                                                        <span class="info-box-number">@Model.Count(a => a.Status == StudentManagementSystem.Models.AttendanceStatus.Leave)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center">
+                            <p>该课程暂时没有考勤记录</p>
+                            <a href="@Url.Action("Courses")" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> 返回课程列表
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('.table').addClass('table-hover');
+        });
+    </script>
+} 

@@ -1,0 +1,194 @@
+@model IEnumerable<StudentManagementSystem.Models.Grade>
+
+@{
+    ViewData["Title"] = "课程成绩管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-line"></i> @ViewBag.CourseName - 成绩管理
+                    </h3>
+                    <div class="card-tools">
+                        <a href="@Url.Action("Courses")" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> 返回课程列表
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    @if (Model != null && Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>学号</th>
+                                        <th>姓名</th>
+                                        <th>考试类型</th>
+                                        <th>分数</th>
+                                        <th>考试日期</th>
+                                        <th>备注</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var grade in Model)
+                                    {
+                                        <tr class="@(grade.Score < 60 ? "table-danger" : "")">
+                                            <td>@grade.Student?.StudentNumber</td>
+                                            <td>@grade.Student?.Name</td>
+                                            <td>
+                                                <span class="badge badge-dark">@grade.ExamType</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-dark">@grade.Score 分</span>
+                                            </td>
+                                            <td>@grade.ExamDate.ToString("yyyy-MM-dd")</td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(grade.Remarks))
+                                                {
+                                                    @if (grade.Remarks.Length > 20)
+                                                    {
+                                                        <span title="@grade.Remarks">
+                                                            @grade.Remarks.Substring(0, 20)...
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        @grade.Remarks
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">无</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-warning" 
+                                                        onclick="editGrade(@grade.GradeId, '@grade.Student?.Name', @grade.Score)" 
+                                                        title="修改成绩">
+                                                    <i class="fas fa-edit"></i> 修改
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-sm-12 col-md-5">
+                                <div class="dataTables_info">
+                                    共显示 @Model.Count() 条成绩记录
+                                </div>
+                            </div>
+                            <div class="col-sm-12 col-md-7">
+                                <div class="text-right">
+                                    <small class="text-muted">
+                                        <span class="badge badge-danger">不及格(&lt;60)</span>
+                                        提示：红色背景表示不及格记录
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center">
+                            <p>该课程暂时没有成绩记录</p>
+                            <a href="@Url.Action("Courses")" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> 返回课程列表
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 修改成绩模态框 -->
+<div class="modal fade" id="editGradeModal" tabindex="-1" aria-labelledby="editGradeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editGradeModalLabel">修改成绩</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editGradeForm">
+                    <div class="mb-3">
+                        <label class="form-label">学生姓名</label>
+                        <input type="text" id="studentName" class="form-control" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newScore" class="form-label">新分数 <span class="text-danger">*</span></label>
+                        <input type="number" id="newScore" class="form-control" min="0" max="100" step="0.1" required>
+                        <small class="form-text text-muted">请输入0-100之间的分数</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="updateGrade()">确认修改</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var currentGradeId = 0;
+        
+        function editGrade(gradeId, studentName, currentScore) {
+            currentGradeId = gradeId;
+            $('#studentName').val(studentName);
+            $('#newScore').val(currentScore);
+            $('#editGradeModal').modal('show');
+        }
+        
+        function updateGrade() {
+            var newScore = $('#newScore').val();
+            
+            if (!newScore || newScore < 0 || newScore > 100) {
+                alert('请输入0-100之间的有效分数');
+                return;
+            }
+            
+            $.ajax({
+                url: '@Url.Action("UpdateGrade")',
+                type: 'POST',
+                data: {
+                    gradeId: currentGradeId,
+                    score: newScore,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        alert('成绩修改成功');
+                        location.reload();
+                    } else {
+                        alert('修改失败：' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('请求失败，请稍后重试');
+                }
+            });
+        }
+        
+        $(document).ready(function() {
+            $('.table').addClass('table-hover');
+            
+            // 添加防伪令牌
+            if (!$('input[name="__RequestVerificationToken"]').length) {
+                $('body').append('@Html.AntiForgeryToken()');
+            }
+        });
+    </script>
+} 

@@ -1,0 +1,354 @@
+@model IEnumerable<StudentManagementSystem.Models.Grade>
+
+@{
+    ViewData["Title"] = "成绩管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    @Html.AntiForgeryToken()
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">成绩管理</h3>
+                    <div class="card-tools">
+                        <a href="@Url.Action("CreateGrade")" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> 添加成绩
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show">
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <h5><i class="icon fas fa-ban"></i> 错误!</h5>
+                            @ViewBag.Error
+                        </div>
+                    }
+
+                    @if (Model != null && Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>学生姓名</th>
+                                        <th>学号</th>
+                                        <th>课程名称</th>
+                                        <th>课程代码</th>
+                                        <th>授课教师</th>
+                                        <th>考试类型</th>
+                                        <th>分数</th>
+                                        <th>考试日期</th>
+                                        <th>备注</th>
+                                        <th>录入时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var grade in Model)
+                                    {
+                                        <tr class="@(grade.Score < 60 ? "table-danger" : "")">
+                                            <td>@(grade.Student?.Name ?? "未知")</td>
+                                            <td>@(grade.Student?.StudentNumber ?? "未知")</td>
+                                            <td>@(grade.Course?.CourseName ?? "未知")</td>
+                                            <td>@(grade.Course?.CourseCode ?? "未知")</td>
+                                            <td>@(grade.Course?.Teacher?.Name ?? "未知")</td>
+                                       <td>
+    @if (!string.IsNullOrEmpty(grade.ExamType))
+    {
+        <span class="badge bg-light text-dark">@grade.ExamType</span>
+    }
+    else
+    {
+        <span class="badge bg-light text-muted">未设置</span>
+    }
+</td>
+
+                                         <td>
+    <span class="badge bg-light text-dark">
+        @grade.Score 分
+    </span>
+</td>
+                                            <td>@grade.ExamDate.ToString("yyyy-MM-dd")</td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(grade.Remarks))
+                                                {
+                                                    @if (grade.Remarks.Length > 20)
+                                                    {
+                                                        <span title="@grade.Remarks">
+                                                            @grade.Remarks.Substring(0, 20)...
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        @grade.Remarks
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">无</span>
+                                                }
+                                            </td>
+                                            <td>@grade.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-sm btn-warning" 
+                                                            onclick="editGrade(@grade.GradeId, '@grade.Student?.Name', @grade.Score)" 
+                                                            title="快速修改">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <a href="@Url.Action("EditGrade", new { id = grade.GradeId })" 
+                                                       class="btn btn-sm btn-info" title="详细编辑">
+                                                        <i class="fas fa-cog"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-danger" 
+                                                            onclick="confirmDelete(@grade.GradeId, '@grade.Student?.Name', '@grade.Course?.CourseName')" 
+                                                            title="删除">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-sm-12 col-md-5">
+                                <div class="dataTables_info">
+                                    共显示 @Model.Count() 条记录
+                                </div>
+                            </div>
+                            <div class="col-sm-12 col-md-7">
+                                <div class="text-end">
+                                    <small class="text-muted">
+                                        <span class="badge bg-danger">不及格(&lt;60)</span>
+                                        <span class="badge bg-secondary">及格(60-69)</span>
+                                        <span class="badge bg-warning">良好(70-79)</span>
+                                        <span class="badge bg-info">优良(80-89)</span>
+                                        <span class="badge bg-success">优秀(≥90)</span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center">
+                            <p>暂无成绩记录</p>
+                            <a href="@Url.Action("CreateGrade")" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> 添加第一条成绩记录
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 修改成绩模态框 -->
+<div class="modal fade" id="editGradeModal" tabindex="-1" aria-labelledby="editGradeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editGradeModalLabel">快速修改成绩</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editGradeForm">
+                    <div class="mb-3">
+                        <label class="form-label">学生姓名</label>
+                        <input type="text" id="editStudentName" class="form-control" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newScore" class="form-label">新分数 <span class="text-danger">*</span></label>
+                        <input type="number" id="newScore" class="form-control" min="0" max="100" step="0.1" required>
+                        <small class="form-text text-muted">请输入0-100之间的分数</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="updateGrade()">确认修改</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 删除确认模态框 -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">确认删除</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>确定要删除学生 <strong id="studentName"></strong> 在课程 <strong id="courseName"></strong> 的成绩记录吗？</p>
+                <p class="text-danger">此操作无法恢复。</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">确认删除</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var currentGradeId = null;
+        var currentEditGradeId = null;
+        
+        function editGrade(gradeId, studentName, currentScore) {
+            currentEditGradeId = gradeId;
+            $('#editStudentName').val(studentName || '未知学生');
+            $('#newScore').val(currentScore);
+            
+            // Bootstrap 5 模态框调用方式
+            var editModal = new bootstrap.Modal(document.getElementById('editGradeModal'));
+            editModal.show();
+        }
+        
+        function updateGrade() {
+            var newScore = $('#newScore').val();
+            
+            if (!newScore || newScore < 0 || newScore > 100) {
+                alert('请输入0-100之间的有效分数');
+                return;
+            }
+            
+            // 禁用按钮防止重复点击
+            $('button[onclick="updateGrade()"]').prop('disabled', true).text('修改中...');
+            
+            // 获取防伪令牌
+            var token = $('input[name="__RequestVerificationToken"]').val();
+            
+            $.ajax({
+                url: '@Url.Action("UpdateGrade", "Admin")',
+                type: 'POST',
+                data: {
+                    gradeId: currentEditGradeId,
+                    score: newScore,
+                    __RequestVerificationToken: token
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // 修改成功，关闭模态框并刷新页面
+                        var editModal = bootstrap.Modal.getInstance(document.getElementById('editGradeModal'));
+                        editModal.hide();
+                        
+                        // 显示成功消息
+                        $('<div class="alert alert-success alert-dismissible fade show">' +
+                          '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                          '<i class="fas fa-check-circle"></i> ' + response.message +
+                          '</div>').prependTo('.card-body').delay(3000).fadeOut();
+                        
+                        // 刷新页面
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        alert('修改失败：' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('请求失败，请稍后重试');
+                },
+                complete: function() {
+                    // 恢复按钮状态
+                    $('button[onclick="updateGrade()"]').prop('disabled', false).text('确认修改');
+                }
+            });
+        }
+        
+        function confirmDelete(gradeId, studentName, courseName) {
+            currentGradeId = gradeId;
+            $('#studentName').text(studentName || '未知学生');
+            $('#courseName').text(courseName || '未知课程');
+            
+            // Bootstrap 5 模态框调用方式
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+        }
+        
+        // 初始化表格功能
+        $(document).ready(function() {
+            $('.table').addClass('table-hover');
+            
+            // 添加排序功能
+            $('.table th').css('cursor', 'pointer');
+            
+            // 监听修改成绩模态框关闭事件
+            $('#editGradeModal').on('hidden.bs.modal', function () {
+                $('#editStudentName').val('');
+                $('#newScore').val('');
+                currentEditGradeId = null;
+            });
+            
+            // 监听删除模态框关闭事件，确保正确清理
+            $('#deleteModal').on('hidden.bs.modal', function () {
+                $('#studentName').text('');
+                $('#courseName').text('');
+                currentGradeId = null;
+            });
+            
+            // 确认删除按钮点击事件
+            $('#confirmDeleteBtn').click(function() {
+                if (!currentGradeId) {
+                    alert('删除参数错误！');
+                    return;
+                }
+                
+                // 禁用按钮防止重复点击
+                $(this).prop('disabled', true).text('删除中...');
+                
+                // 获取防伪令牌
+                var token = $('input[name="__RequestVerificationToken"]').val();
+                
+                // 发送AJAX删除请求
+                $.ajax({
+                    url: '@Url.Action("DeleteGrade", "Admin")/' + currentGradeId,
+                    type: 'POST',
+                    headers: {
+                        'RequestVerificationToken': token
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // 删除成功，关闭模态框并刷新页面
+                            var deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+                            deleteModal.hide();
+                            
+                            // 显示成功消息
+                            $('<div class="alert alert-success alert-dismissible fade show">' +
+                              '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                              '<i class="fas fa-check-circle"></i> ' + response.message +
+                              '</div>').prependTo('.card-body').delay(3000).fadeOut();
+                            
+                            // 刷新页面或移除表格行
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1500);
+                        } else {
+                            // 删除失败，显示错误消息
+                            alert('删除失败：' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('删除失败：网络错误');
+                    },
+                    complete: function() {
+                        // 恢复按钮状态
+                        $('#confirmDeleteBtn').prop('disabled', false).text('确认删除');
+                    }
+                });
+            });
+        });
+    </script>
+} 

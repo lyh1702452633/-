@@ -1,0 +1,205 @@
+@model IEnumerable<StudentManagementSystem.Models.Teacher>
+
+@{
+    ViewData["Title"] = "教师管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">教师管理</h3>
+                    <div class="card-tools">
+                        <a href="@Url.Action("CreateTeacher")" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> 添加教师
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                            <h5><i class="icon fas fa-ban"></i> 错误!</h5>
+                            @ViewBag.Error
+                        </div>
+                    }
+
+                    @if (Model != null && Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>教师编号</th>
+                                        <th>姓名</th>
+                                        <th>性别</th>
+                                        <th>部门</th>
+                                        <th>职称</th>
+                                        <th>邮箱</th>
+                                        <th>电话</th>
+                                        <th>入职日期</th>
+                                        <th>用户名</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var teacher in Model)
+                                    {
+                                        <tr>
+                                            <td>@teacher.TeacherNumber</td>
+                                            <td>@teacher.Name</td>
+                                            <td>@(teacher.Gender ?? "未设置")</td>
+                                            <td>@(teacher.Department ?? "未设置")</td>
+                                            <td>@(teacher.Title ?? "未设置")</td>
+                                            <td>@(teacher.Email ?? "未设置")</td>
+                                            <td>@(teacher.Phone ?? "未设置")</td>
+                                            <td>@teacher.HireDate.ToString("yyyy-MM-dd")</td>
+                                            <td>@(teacher.User?.Username ?? "未知")</td>
+                                            <td>
+                                                @if (teacher.User?.IsActive == true)
+                                                {
+                                                    <span class="badge badge-success">激活</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-danger">禁用</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="@Url.Action("EditTeacher", new { id = teacher.TeacherId })" 
+                                                       class="btn btn-sm btn-info" title="编辑">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-danger" 
+                                                            onclick="confirmDelete(@teacher.TeacherId, '@teacher.Name')" 
+                                                            title="删除">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-sm-12 col-md-5">
+                                <div class="dataTables_info">
+                                    共显示 @Model.Count() 条记录
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center">
+                            <p>暂无教师信息</p>
+                            <a href="@Url.Action("CreateTeacher")" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> 添加第一个教师
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 删除确认模态框 -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">确认删除</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>确定要删除教师 <strong id="teacherName"></strong> 吗？</p>
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>警告：</strong>此操作将会：
+                    <ul class="mb-0 mt-2">
+                        <li>删除该教师的用户账户</li>
+                        <li>删除该教师的基本信息</li>
+                        <li>删除该教师授课的所有课程</li>
+                        <li>删除这些课程的所有成绩记录</li>
+                        <li>删除这些课程的所有考勤记录</li>
+                    </ul>
+                </div>
+                <p class="text-danger"><strong>此操作无法恢复，请谨慎操作！</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">确认删除</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(teacherId, teacherName) {
+            $('#teacherName').text(teacherName);
+            $('#deleteForm').attr('action', '@Url.Action("DeleteTeacher")/' + teacherId);
+            
+            // Bootstrap 5 方式显示模态框
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+        }
+
+        // 处理删除表单提交
+        $(document).ready(function() {
+            $('#deleteForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                var form = $(this);
+                var actionUrl = form.attr('action');
+                
+                $.ajax({
+                    url: actionUrl,
+                    type: 'POST',
+                    data: form.serialize(),
+                    success: function(response) {
+                        // Bootstrap 5 方式关闭模态框
+                        var deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+                        deleteModal.hide();
+                        
+                        if (response.success) {
+                            // 显示成功消息
+                            alert('删除成功！');
+                            // 刷新页面
+                            location.reload();
+                        } else {
+                            // 显示错误消息
+                            alert('删除失败：' + response.message);
+                        }
+                    },
+                    error: function() {
+                        // Bootstrap 5 方式关闭模态框
+                        var deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+                        deleteModal.hide();
+                        alert('删除失败：服务器错误，请稍后重试。');
+                    }
+                });
+            });
+        });
+        
+        // 初始化表格功能
+        $(document).ready(function() {
+            $('.table').addClass('table-hover');
+            
+            // 添加表格搜索功能
+            $('#teacherTable_filter input').attr('placeholder', '搜索教师...');
+        });
+    </script>
+} 

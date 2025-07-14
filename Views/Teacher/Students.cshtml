@@ -1,0 +1,101 @@
+@model IEnumerable<StudentManagementSystem.Models.Student>
+
+@{
+    ViewData["Title"] = "课程学生列表";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-users"></i> @ViewBag.CourseName - 学生列表
+                    </h3>
+                    <div class="card-tools">
+                        <a href="@Url.Action("Courses")" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> 返回课程列表
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    @if (Model != null && Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>学号</th>
+                                        <th>姓名</th>
+                                        <th>班级</th>
+                                        <th>性别</th>
+                                        <th>邮箱</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var student in Model)
+                                    {
+                                        <tr>
+                                            <td>@student.StudentNumber</td>
+                                            <td>@student.Name</td>
+                                            <td>@(student.Class ?? "未设置")</td>
+                                            <td>@(student.Gender ?? "未设置")</td>
+                                            <td>@(student.Email ?? "未设置")</td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="@Url.Action("Grades", new { courseId = ViewBag.CourseId })" 
+                                                       class="btn btn-sm btn-success" title="查看成绩">
+                                                        <i class="fas fa-chart-line"></i> 查看成绩
+                                                    </a>
+                                                 
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-sm-12 col-md-5">
+                                <div class="dataTables_info">
+                                    共显示 @Model.Count() 名学生
+                                </div>
+                            </div>
+                            <div class="col-sm-12 col-md-7">
+                                <div class="text-right">
+                                    <a href="@Url.Action("Grades", new { courseId = ViewBag.CourseId })" class="btn btn-success">
+                                        <i class="fas fa-chart-line"></i> 查看所有成绩
+                                    </a>
+                                    <a href="@Url.Action("Attendance", new { courseId = ViewBag.CourseId })" class="btn btn-warning ml-2">
+                                        <i class="fas fa-calendar-check"></i> 查看所有考勤
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center">
+                            <p>该课程暂时没有学生</p>
+                            <a href="@Url.Action("Courses")" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> 返回课程列表
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('.table').addClass('table-hover');
+        });
+    </script>
+} 

@@ -1,0 +1,175 @@
+@model StudentManagementSystem.Models.Teacher
+
+@{
+    ViewData["Title"] = "编辑教师";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">编辑教师信息</h3>
+                    <div class="card-tools">
+                        <a href="@Url.Action("Teachers")" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> 返回列表
+                        </a>
+                    </div>
+                </div>
+                
+                <form method="post">
+                    @Html.HiddenFor(m => m.TeacherId)
+                    @Html.HiddenFor(m => m.UserId)
+                    @Html.HiddenFor(m => m.HireDate)
+                    
+                    <div class="card-body">
+                        @if (ViewBag.Error != null)
+                        {
+                            <div class="alert alert-danger alert-dismissible">
+                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                <h5><i class="icon fas fa-ban"></i> 错误!</h5>
+                                @ViewBag.Error
+                            </div>
+                        }
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="TeacherNumber">教师编号 <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="TeacherNumber" name="TeacherNumber" 
+                                           value="@Model.TeacherNumber" required maxlength="20">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="Name">姓名 <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="Name" name="Name" 
+                                           value="@Model.Name" required maxlength="50">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="Gender">性别</label>
+                                    <select class="form-control" id="Gender" name="Gender">
+                                        <option value="">请选择</option>
+                                        <option value="男" selected="@(Model.Gender == "男")">男</option>
+                                        <option value="女" selected="@(Model.Gender == "女")">女</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="BirthDate">出生日期</label>
+                                    <input type="date" class="form-control" id="BirthDate" name="BirthDate" 
+                                           value="@(Model.BirthDate?.ToString("yyyy-MM-dd"))">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="Department">部门</label>
+                                    <input type="text" class="form-control" id="Department" name="Department" 
+                                           value="@Model.Department" maxlength="50" placeholder="例如：计算机学院">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="Title">职称</label>
+                                    <select class="form-control" id="Title" name="Title">
+                                        <option value="">请选择</option>
+                                        <option value="助教" selected="@(Model.Title == "助教")">助教</option>
+                                        <option value="讲师" selected="@(Model.Title == "讲师")">讲师</option>
+                                        <option value="副教授" selected="@(Model.Title == "副教授")">副教授</option>
+                                        <option value="教授" selected="@(Model.Title == "教授")">教授</option>
+                                        <option value="其他" selected="@(Model.Title == "其他")">其他</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="Email">邮箱</label>
+                                    <input type="email" class="form-control" id="Email" name="Email" 
+                                           value="@Model.Email" maxlength="100" placeholder="example@email.com">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="Phone">电话</label>
+                                    <input type="tel" class="form-control" id="Phone" name="Phone" 
+                                           value="@Model.Phone" maxlength="20" placeholder="13800138000">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>入职日期</label>
+                                    <input type="text" class="form-control" 
+                                           value="@Model.HireDate.ToString("yyyy-MM-dd")" readonly>
+                                    <small class="form-text text-muted">入职日期不可修改</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+                        <h5>关联账户信息</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>用户名</label>
+                                    <input type="text" class="form-control" 
+                                           value="@Model.User?.Username" readonly>
+                                    <small class="form-text text-muted">用户名不可修改</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>账户状态</label>
+                                    <input type="text" class="form-control" 
+                                           value="@(Model.User?.IsActive == true ? "激活" : "禁用")" readonly>
+                                    <small class="form-text text-muted">账户状态需通过用户管理功能修改</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> 保存修改
+                        </button>
+                        <a href="@Url.Action("Teachers")" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> 取消
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('form').on('submit', function(e) {
+                var teacherNumber = $('#TeacherNumber').val().trim();
+                var name = $('#Name').val().trim();
+                
+                if (!teacherNumber || !name) {
+                    alert('请填写教师编号和姓名！');
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        });
+    </script>
+} 

@@ -1,0 +1,195 @@
+@model IEnumerable<StudentManagementSystem.Models.Attendance>
+
+@{
+    ViewData["Title"] = "考勤管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">考勤管理</h3>
+                    <div class="card-tools">
+                        <a href="@Url.Action("CreateAttendance")" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> 添加考勤记录
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                            <h5><i class="icon fas fa-ban"></i> 错误!</h5>
+                            @ViewBag.Error
+                        </div>
+                    }
+
+                    @if (Model != null && Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>学生姓名</th>
+                                        <th>学号</th>
+                                        <th>课程名称</th>
+                                        <th>课程代码</th>
+                                        <th>授课教师</th>
+                                        <th>考勤日期</th>
+                                        <th>考勤状态</th>
+                                        <th>备注</th>
+                                        <th>录入时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var attendance in Model)
+                                    {
+                                        <tr class="@(attendance.Status == StudentManagementSystem.Models.AttendanceStatus.Absent ? "table-danger" : 
+                                                     attendance.Status == StudentManagementSystem.Models.AttendanceStatus.Late ? "table-warning" : "")">
+                                            <td>@(attendance.Student?.Name ?? "未知")</td>
+                                            <td>@(attendance.Student?.StudentNumber ?? "未知")</td>
+                                            <td>@(attendance.Course?.CourseName ?? "未知")</td>
+                                            <td>@(attendance.Course?.CourseCode ?? "未知")</td>
+                                            <td>@(attendance.Course?.Teacher?.Name ?? "未知")</td>
+                                            <td>@attendance.AttendanceDate.ToString("yyyy-MM-dd")</td>
+                                            <td>
+                                                @switch (attendance.Status)
+                                                {
+                                                    case StudentManagementSystem.Models.AttendanceStatus.Present:
+                                                        <span class="badge badge-success">出勤</span>
+                                                        break;
+                                                    case StudentManagementSystem.Models.AttendanceStatus.Absent:
+                                                        <span class="badge badge-danger">缺勤</span>
+                                                        break;
+                                                    case StudentManagementSystem.Models.AttendanceStatus.Late:
+                                                        <span class="badge badge-warning">迟到</span>
+                                                        break;
+                                                    case StudentManagementSystem.Models.AttendanceStatus.Leave:
+                                                        <span class="badge badge-info">请假</span>
+                                                        break;
+                                                    default:
+                                                        <span class="badge badge-secondary">未知</span>
+                                                        break;
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(attendance.Remarks))
+                                                {
+                                                    @if (attendance.Remarks.Length > 20)
+                                                    {
+                                                        <span title="@attendance.Remarks">
+                                                            @attendance.Remarks.Substring(0, 20)...
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        @attendance.Remarks
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">无</span>
+                                                }
+                                            </td>
+                                            <td>@attendance.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="@Url.Action("EditAttendance", new { id = attendance.AttendanceId })" 
+                                                       class="btn btn-sm btn-info" title="编辑">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-danger" 
+                                                            onclick="confirmDelete(@attendance.AttendanceId, '@attendance.Student?.Name', '@attendance.Course?.CourseName')" 
+                                                            title="删除">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-sm-12 col-md-5">
+                                <div class="dataTables_info">
+                                    共显示 @Model.Count() 条记录
+                                </div>
+                            </div>
+                            <div class="col-sm-12 col-md-7">
+                                <div class="text-right">
+                                    <small class="text-muted">
+                                        <span class="badge badge-success">出勤</span>
+                                        <span class="badge badge-warning">迟到</span>
+                                        <span class="badge badge-info">请假</span>
+                                        <span class="badge badge-danger">缺勤</span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center">
+                            <p>暂无考勤记录</p>
+                            <a href="@Url.Action("CreateAttendance")" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> 添加第一条考勤记录
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 删除确认模态框 -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">确认删除</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>确定要删除学生 <strong id="studentName"></strong> 在课程 <strong id="courseName"></strong> 的考勤记录吗？</p>
+                <p class="text-danger">此操作无法恢复。</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">确认删除</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(attendanceId, studentName, courseName) {
+            $('#studentName').text(studentName || '未知学生');
+            $('#courseName').text(courseName || '未知课程');
+            $('#deleteForm').attr('action', '@Url.Action("DeleteAttendance")/' + attendanceId);
+            
+            // Bootstrap 5 模态框调用方式
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+        }
+        
+        // 初始化表格功能
+        $(document).ready(function() {
+            $('.table').addClass('table-hover');
+            
+            // 添加筛选功能
+            $('.table th').css('cursor', 'pointer');
+        });
+    </script>
+} 
